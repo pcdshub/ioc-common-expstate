@@ -1,0 +1,40 @@
+record(waveform, "$(P):StateOptions") {
+    field(DESC, "All possible experiment states")
+    # Array of strings (40 chars):
+    field(FTVL, "STRING")
+    # Maximum amount of strings:
+    field(NELM, $(MAX_STRINGS=200))
+    field(APST, "On Change")
+    field(MPST, "On Change")
+    info(autosaveFields, "VAL NELM")
+}
+
+record(subArray, "$(P):State") {
+    field(DESC, "Current experiment state")
+    field(FTVL, "STRING")
+    # From the array of strings:
+    field(INP, "$(P):StateOptions.VAL CP MS")
+    # Grab starting the following index:
+    field(INDX, "1")
+    # Read this many items:
+    field(NELM, "1")
+    # Buffer must be the same size as the input to read in all values
+    field(MALM, "$(MAX_STRINGS=200)")
+    info(autosaveFields, "INDX")
+}
+
+record(longin, "$(P):StateIndex") {
+    field(DESC, "Current experiment state index")
+    field(INP, "$(P):State.INDX CP MS")
+    info(autosaveFields, "VAL")
+}
+
+record(lso, "$(P):UserStatus") {
+    field(DESC, "Free-form user-specified status")
+    # Put to $(P):UserStatus.VAL$ for long-string access.
+    # Maximum length of the string:
+    field(SIZV, "$(USER_STATUS_MAX=1024)")
+    field(APST, "On Change")
+    field(MPST, "On Change")
+    info(autosaveFields, "VAL DESC")
+}

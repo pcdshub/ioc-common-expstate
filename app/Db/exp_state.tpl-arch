@@ -1,0 +1,4 @@
+$(P)StateOptions   100    monitor
+$(P)StateIndex   1    monitor
+$(P)State   1    monitor
+$(P)UserStatus   1    monitor

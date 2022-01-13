@@ -1,0 +1,12 @@
+*.sw[op]
+O.*
+/bin/
+/db/
+/dbd/
+/archive/
+/autosave/
+/include/
+envPaths
+.DS_Store
+tags
+/RELEASE_SITE
