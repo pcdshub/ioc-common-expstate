@@ -6,6 +6,7 @@ record(waveform, "$(P):StateOptions") {
     field(NELM, $(MAX_STRINGS=200))
     field(APST, "On Change")
     field(MPST, "On Change")
+    field(PINI, "1")
     info(autosaveFields, "VAL NELM")
 }
 
@@ -36,5 +37,6 @@ record(lso, "$(P):UserStatus") {
     field(SIZV, "$(USER_STATUS_MAX=1024)")
     field(APST, "On Change")
     field(MPST, "On Change")
+    field(PINI, "1")
     info(autosaveFields, "VAL DESC")
 }
