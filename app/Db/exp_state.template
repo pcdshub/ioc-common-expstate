@@ -2,13 +2,14 @@
 #
 # Record API notes:
 #
-# * The client should update :StateOptions and :StateOptionsJSON
-#   either at startup or when updates are available.
+# * The client should update :StateOptions and :StateOptionsJSON.VAL$
+#   either at startup or when changes to the state options are available.
+# * Individual state options are limited to DBF_STRING length (40 chars).
 # * The client should write to :StateOptions.INDX when a new state
 #   change has happened.
-# * The free-form :UserStatus may be updated as needed and has no
-#   real restrictions except its maximum length of $(USER_STATUS_MAX)
-#   which defaults to 1024.
+# * The free-form :UserStatus (long string access by way of :UserStatus.VAL$)
+#   may be updated as needed and has no real restrictions except its maximum
+#   length of $(USER_STATUS_MAX) which defaults to 1024.
 # * The client may monitor :State (or :StateString) 
 #   and :State.INDX (or :StateIndex) to get status updates.
 
