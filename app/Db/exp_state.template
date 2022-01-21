@@ -1,13 +1,33 @@
+# Experiment State Tracker
+#
+# Record API notes:
+#
+# * The client should update :StateOptions and :StateOptionsJSON
+#   either at startup or when changes to the state options are available.
+#   :StateOptions is a waveform of strings, each of which is a valid
+#   experimental state. :StateOptionsJSON mirrors :StateOptions and reflects
+#   the states in a serialized JSON object representation (which is easily
+#   archived and consumed by Python clients).
+# * Individual state options are limited to DBF_STRING length (40 chars).
+# * The client should write to :StateOptions.INDX when a new state
+#   change is desired. This value refers to the array index of the state
+#   option as in :StateOptions above.
+# * The free-form :UserStatus may be updated as needed and has no real
+#   restrictions except its maximum length of the macro USER_STATUS_MAX, which
+#   defaults to 1024.
+# * The client may monitor :State (or :StateString) 
+#   and :State.INDX (or :StateIndex) to get status updates.
+
 record(waveform, "$(P):StateOptions") {
     field(DESC, "All possible experiment states")
     # Array of strings (40 chars):
     field(FTVL, "STRING")
     # Maximum amount of strings:
-    field(NELM, $(MAX_STRINGS=200))
+    field(NELM, "$(MAX_STRINGS=200)")
     field(APST, "On Change")
     field(MPST, "On Change")
     field(PINI, "1")
-    info(autosaveFields, "VAL NELM")
+    info(autosaveFields, "VAL NELM DESC")
 }
 
 record(subArray, "$(P):State") {
@@ -21,20 +41,44 @@ record(subArray, "$(P):State") {
     field(NELM, "1")
     # Buffer must be the same size as the input to read in all values
     field(MALM, "$(MAX_STRINGS=200)")
-    info(autosaveFields, "INDX")
+    info(autosaveFields, "INDX DESC")
 }
 
+# Some clients (the archiver appliance included) may have issues with the
+# subArray and waveform of strings above.  Expose the state index and strings
+# as separate records for their convenience:
 record(longin, "$(P):StateIndex") {
     field(DESC, "Current experiment state index")
     field(INP, "$(P):State.INDX CP MS")
-    info(autosaveFields, "VAL")
+    info(autosaveFields, "VAL DESC")
 }
 
-record(lso, "$(P):UserStatus") {
-    field(DESC, "Free-form user-specified status")
-    # Put to $(P):UserStatus.VAL$ for long-string access.
+record(stringin, "$(P):StateString") {
+    field(DESC, "Current experiment state string")
+    field(INP, "$(P):State.VAL[0] CP MS")
+    field(APST, "On Change")
+    field(MPST, "On Change")
+    info(autosaveFields, "VAL DESC")
+}
+
+record(waveform, "$(P):StateOptionsJSON") {
+    field(DESC, "StateOptions as a JSON dictionary")
+    # Array of char, i.e., a long string:
+    field(FTVL, "CHAR")
     # Maximum length of the string:
-    field(SIZV, "$(USER_STATUS_MAX=1024)")
+    field(NELM, "$(OPTIONS_MAX=16384)")
+    field(APST, "On Change")
+    field(MPST, "On Change")
+    field(PINI, "1")
+    info(autosaveFields, "VAL DESC")
+}
+
+record(waveform, "$(P):UserStatus") {
+    field(DESC, "Free-form user-specified status")
+    # Array of char, i.e., a long string:
+    field(FTVL, "CHAR")
+    # Maximum length of the string:
+    field(NELM, "$(USER_STATUS_MAX=1024)")
     field(APST, "On Change")
     field(MPST, "On Change")
     field(PINI, "1")

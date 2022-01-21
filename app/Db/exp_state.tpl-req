@@ -1,5 +1,13 @@
+$(P)State.DESC
 $(P)State.INDX
 $(P)State.VAL
+$(P)StateIndex.DESC
 $(P)StateIndex.VAL
+$(P)StateString.DESC
+$(P)StateString.VAL
+$(P)StateOptions.DESC
 $(P)StateOptions.VAL
+$(P)StateOptionsJSON.DESC
+$(P)StateOptionsJSON.VAL
+$(P)UserStatus.DESC
 $(P)UserStatus.VAL
