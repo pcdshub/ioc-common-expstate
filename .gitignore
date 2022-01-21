@@ -10,3 +10,4 @@ envPaths
 .DS_Store
 tags
 /RELEASE_SITE
+__pycache__

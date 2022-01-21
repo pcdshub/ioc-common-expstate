@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import partial
+import json
 
 from ophyd import EpicsSignal
 
@@ -118,6 +119,18 @@ class ESTApp(Display):
             name='state_options',
         )
         state_options.put([state.desc for state in experiment_states.values()])
+        state_json = EpicsSignal(
+            f'IOC:{endstation}:EXPSTATE:StateOptionsJSON.VAL$',
+            name='state_options_json',
+        )
+        state_json.put(
+            json.dumps(
+                {
+                    state.index: state.desc
+                    for state in experiment_states.values()
+                }
+            )
+        )
 
     def setup_radio_buttons(self):
         for state in experiment_states.values():
@@ -151,9 +164,11 @@ class ESTApp(Display):
 
     def get_timer_setting(self):
         try:
-            return int(self.ui.timer_setting_edit.text())
+            value = int(self.ui.timer_setting_edit.text())
         except ValueError:
-            return 15
+            value = 15
+        # Cap the timer at 1 hour
+        return min(value, 60)
 
     def reset_timer(self):
         mins = self.get_timer_setting()
