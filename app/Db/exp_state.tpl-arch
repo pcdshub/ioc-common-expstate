@@ -1,4 +1,6 @@
 $(P)StateOptions   100    monitor
+$(P)StateOptionsJSON   100    monitor
 $(P)StateIndex   1    monitor
+$(P)StateString   1    monitor
 $(P)State   1    monitor
 $(P)UserStatus   1    monitor

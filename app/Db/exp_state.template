@@ -1,13 +1,27 @@
+# Experiment State Tracker
+#
+# Record API notes:
+#
+# * The client should update :StateOptions and :StateOptionsJSON
+#   either at startup or when updates are available.
+# * The client should write to :StateOptions.INDX when a new state
+#   change has happened.
+# * The free-form :UserStatus may be updated as needed and has no
+#   real restrictions except its maximum length of $(USER_STATUS_MAX)
+#   which defaults to 1024.
+# * The client may monitor :State (or :StateString) 
+#   and :State.INDX (or :StateIndex) to get status updates.
+
 record(waveform, "$(P):StateOptions") {
     field(DESC, "All possible experiment states")
     # Array of strings (40 chars):
     field(FTVL, "STRING")
     # Maximum amount of strings:
-    field(NELM, $(MAX_STRINGS=200))
+    field(NELM, "$(MAX_STRINGS=200)")
     field(APST, "On Change")
     field(MPST, "On Change")
     field(PINI, "1")
-    info(autosaveFields, "VAL NELM")
+    info(autosaveFields, "VAL NELM DESC")
 }
 
 record(subArray, "$(P):State") {
@@ -21,13 +35,35 @@ record(subArray, "$(P):State") {
     field(NELM, "1")
     # Buffer must be the same size as the input to read in all values
     field(MALM, "$(MAX_STRINGS=200)")
-    info(autosaveFields, "INDX")
+    info(autosaveFields, "INDX DESC")
 }
 
+# Some clients (the archiver appliance included) may have issues with the
+# subArray and waveform of strings above.  Expose the state index and strings
+# as separate records for their convenience:
 record(longin, "$(P):StateIndex") {
     field(DESC, "Current experiment state index")
     field(INP, "$(P):State.INDX CP MS")
-    info(autosaveFields, "VAL")
+    info(autosaveFields, "VAL DESC")
+}
+
+record(stringin, "$(P):StateString") {
+    field(DESC, "Current experiment state string")
+    field(INP, "$(P):State.VAL[0] CP MS")
+    field(APST, "On Change")
+    field(MPST, "On Change")
+    info(autosaveFields, "VAL DESC")
+}
+
+record(lso, "$(P):StateOptionsJSON") {
+    field(DESC, "StateOptions as a JSON dictionary")
+    # Put to $(P):StateOptionsJSON.VAL$ for long-string access.
+    # Maximum length of the string:
+    field(SIZV, "$(OPTIONS_MAX=16384)")
+    field(APST, "On Change")
+    field(MPST, "On Change")
+    field(PINI, "1")
+    info(autosaveFields, "VAL DESC")
 }
 
 record(lso, "$(P):UserStatus") {
