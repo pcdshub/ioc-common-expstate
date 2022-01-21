@@ -2,7 +2,7 @@
 #
 # Record API notes:
 #
-# * The client should update :StateOptions and :StateOptionsJSON.VAL$
+# * The client should update :StateOptions and :StateOptionsJSON
 #   either at startup or when changes to the state options are available.
 #   :StateOptions is a waveform of strings, each of which is a valid
 #   experimental state. :StateOptionsJSON mirrors :StateOptions and reflects
@@ -12,9 +12,9 @@
 # * The client should write to :StateOptions.INDX when a new state
 #   change is desired. This value refers to the array index of the state
 #   option as in :StateOptions above.
-# * The free-form :UserStatus (long string access by way of :UserStatus.VAL$)
-#   may be updated as needed and has no real restrictions except its maximum
-#   length of $(USER_STATUS_MAX) which defaults to 1024.
+# * The free-form :UserStatus may be updated as needed and has no real
+#   restrictions except its maximum length of the macro USER_STATUS_MAX, which
+#   defaults to 1024.
 # * The client may monitor :State (or :StateString) 
 #   and :State.INDX (or :StateIndex) to get status updates.
 
@@ -61,22 +61,24 @@ record(stringin, "$(P):StateString") {
     info(autosaveFields, "VAL DESC")
 }
 
-record(lso, "$(P):StateOptionsJSON") {
+record(waveform, "$(P):StateOptionsJSON") {
     field(DESC, "StateOptions as a JSON dictionary")
-    # Put to $(P):StateOptionsJSON.VAL$ for long-string access.
+    # Array of char, i.e., a long string:
+    field(FTVL, "CHAR")
     # Maximum length of the string:
-    field(SIZV, "$(OPTIONS_MAX=16384)")
+    field(NELM, "$(OPTIONS_MAX=16384)")
     field(APST, "On Change")
     field(MPST, "On Change")
     field(PINI, "1")
     info(autosaveFields, "VAL DESC")
 }
 
-record(lso, "$(P):UserStatus") {
+record(waveform, "$(P):UserStatus") {
     field(DESC, "Free-form user-specified status")
-    # Put to $(P):UserStatus.VAL$ for long-string access.
+    # Array of char, i.e., a long string:
+    field(FTVL, "CHAR")
     # Maximum length of the string:
-    field(SIZV, "$(USER_STATUS_MAX=1024)")
+    field(NELM, "$(USER_STATUS_MAX=1024)")
     field(APST, "On Change")
     field(MPST, "On Change")
     field(PINI, "1")
