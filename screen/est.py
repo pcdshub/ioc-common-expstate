@@ -120,8 +120,9 @@ class ESTApp(Display):
         )
         state_options.put([state.desc for state in experiment_states.values()])
         state_json = EpicsSignal(
-            f'IOC:{endstation}:EXPSTATE:StateOptionsJSON.VAL$',
+            f'IOC:{endstation}:EXPSTATE:StateOptionsJSON',
             name='state_options_json',
+            string=True,
         )
         state_json.put(
             json.dumps(
