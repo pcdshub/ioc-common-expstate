@@ -4,9 +4,14 @@
 #
 # * The client should update :StateOptions and :StateOptionsJSON.VAL$
 #   either at startup or when changes to the state options are available.
+#   :StateOptions is a waveform of strings, each of which is a valid
+#   experimental state. :StateOptionsJSON mirrors :StateOptions and reflects
+#   the states in a serialized JSON object representation (which is easily
+#   archived and consumed by Python clients).
 # * Individual state options are limited to DBF_STRING length (40 chars).
 # * The client should write to :StateOptions.INDX when a new state
-#   change has happened.
+#   change is desired. This value refers to the array index of the state
+#   option as in :StateOptions above.
 # * The free-form :UserStatus (long string access by way of :UserStatus.VAL$)
 #   may be updated as needed and has no real restrictions except its maximum
 #   length of $(USER_STATUS_MAX) which defaults to 1024.
