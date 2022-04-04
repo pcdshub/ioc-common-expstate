@@ -6,16 +6,31 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
-    <height>415</height>
+    <width>528</width>
+    <height>718</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetMinimumSize</enum>
+   </property>
    <item>
     <widget class="QLabel" name="title">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="font">
       <font>
        <pointsize>15</pointsize>
@@ -31,6 +46,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
      <property name="rightMargin">
       <number>0</number>
      </property>
@@ -47,20 +65,19 @@
        </property>
        <item>
         <widget class="QRadioButton" name="config_change_button">
-         <property name="text">
-          <string>Configuration Change</string>
+         <property name="toolTip">
+          <string>ACR is tuning or changing the beam.</string>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="tuning_button">
          <property name="text">
-          <string>Tuning</string>
+          <string>Configuration Change / Tuning</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="beam_down_button">
+         <property name="toolTip">
+          <string>Issues with accelerator causing no usable x-ray beam.</string>
+         </property>
          <property name="text">
           <string>Beam Down (Upstream of Dump)</string>
          </property>
@@ -75,15 +92,21 @@
        </item>
        <item>
         <widget class="QRadioButton" name="alignment_button">
+         <property name="toolTip">
+          <string>Aligning distribution mirrors, slits, apertures, monochromators and validating performance, transmission, intensity.</string>
+         </property>
          <property name="text">
-          <string>Alignment and Shaping</string>
+          <string>X-ray Beam Alignment</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="focusing_button">
+         <property name="toolTip">
+          <string>Aligning focusing optics and validating performance, measuring spot size.</string>
+         </property>
          <property name="text">
-          <string>Focusing and Correction</string>
+          <string>X-ray Beam Focusing</string>
          </property>
         </widget>
        </item>
@@ -96,27 +119,39 @@
        </item>
        <item>
         <widget class="QRadioButton" name="ip_spacial_button">
+         <property name="toolTip">
+          <string>Aligning the laser to overlap with the x-rays at the sample/interaction region.</string>
+         </property>
          <property name="text">
-          <string>IP Spatial Overlap</string>
+          <string>Laser / X-ray Spatial Overlap</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="coarse_timing_button">
+         <property name="toolTip">
+          <string>Determining the relative time between the x-rays and the laser within 10s of picosecond.</string>
+         </property>
          <property name="text">
-          <string>Coarse Timing</string>
+          <string>Laser Coarse Timing</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="fine_timing_button">
+         <property name="toolTip">
+          <string>Determining the relative time between the x-rays and the laser to better than 1 ps.</string>
+         </property>
          <property name="text">
-          <string>Fine Timing</string>
+          <string>Laser Fine Timing</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="sample_alignment_button">
+         <property name="toolTip">
+          <string>Time spent aligning the sample position, angle, before collecting data.</string>
+         </property>
          <property name="text">
           <string>Sample Alignment</string>
          </property>
@@ -131,8 +166,21 @@
        </item>
        <item>
         <widget class="QRadioButton" name="collecting_data_button">
+         <property name="toolTip">
+          <string>Collecting data and recording it in the DAQ.</string>
+         </property>
          <property name="text">
           <string>Collecting Data</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="sample_change_button">
+         <property name="toolTip">
+          <string>Time spent exchanging a sample.</string>
+         </property>
+         <property name="text">
+          <string>Sample Change</string>
          </property>
         </widget>
        </item>
@@ -144,9 +192,119 @@
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="instrument_down_button">
+        <widget class="QLabel" name="label">
          <property name="text">
-          <string>Instrument Down</string>
+          <string>     Instrument Down</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_pps_button">
+         <property name="toolTip">
+          <string>The beam in unavailable because of an issue with the Personnel Protection System (PPS), such as the XRT is not searched, a stopper is disabled due to a Radiation Safety Work Control Form.</string>
+         </property>
+         <property name="text">
+          <string>Down - PPS</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_mps_button">
+         <property name="toolTip">
+          <string>The beam is unavailable because there is a trip on the Machine Protection System or the Photon Machine Protection System.</string>
+         </property>
+         <property name="text">
+          <string>Down - MPS / PMPS</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_mechanical_button">
+         <property name="toolTip">
+          <string>The beam is not used because of a mechanical issue with a system that is being repaired, example: a broken stage being replaced.</string>
+         </property>
+         <property name="text">
+          <string>Down -Mechanical</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_laser_button">
+         <property name="toolTip">
+          <string>The beam is not being used because work is happening on the laser.</string>
+         </property>
+         <property name="text">
+          <string>Down - Laser</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_controls_button">
+         <property name="toolTip">
+          <string>The beam is not being used because work is happening on the controls system preventing use of the beam until resolved.</string>
+         </property>
+         <property name="text">
+          <string>Down - Controls</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_daq_button">
+         <property name="toolTip">
+          <string>The beam is not being used because the DAQ is not functional and needs to work to collect data.</string>
+         </property>
+         <property name="text">
+          <string>Down - DAQ</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_ami_button">
+         <property name="toolTip">
+          <string>The beam is not being used because of issues with AMI causing either a stop in data collection or a stop to all activities while it is getting fixed.</string>
+         </property>
+         <property name="text">
+          <string>Down - AMI</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_network_button">
+         <property name="toolTip">
+          <string>The beam is not being used because of issues with the LCLS network.</string>
+         </property>
+         <property name="text">
+          <string>Down - Network</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_sample_delivery_button">
+         <property name="toolTip">
+          <string>The beam is not being used because work is taking place to fix issues with sample delivery.</string>
+         </property>
+         <property name="text">
+          <string>Down - Sample Delivery</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_data_analysis_button">
+         <property name="toolTip">
+          <string>The beam is not being used while awaiting data analysis/processing to provide guidance on what to do next.</string>
+         </property>
+         <property name="text">
+          <string>Down - Data Analysis Delaying Decision</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="down_other_button">
+         <property name="toolTip">
+          <string>The beam is not being used for a reason not captured above.</string>
+         </property>
+         <property name="text">
+          <string>Down - Other</string>
          </property>
         </widget>
        </item>
@@ -159,10 +317,26 @@
        </item>
        <item>
         <widget class="QRadioButton" name="standby_button">
+         <property name="toolTip">
+          <string>You are going to sleep, the shift is over.</string>
+         </property>
          <property name="text">
           <string>Standby / Off Shift</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>1</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </item>
@@ -324,9 +498,35 @@
          </widget>
         </widget>
        </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>1</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>1</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

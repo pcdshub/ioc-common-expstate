@@ -6,11 +6,16 @@ from ophyd import EpicsSignal
 
 from pydm import Display
 from pydm.widgets.channel import PyDMChannel
+from pydm.widgets import PyDMLineEdit
 
 from qtpy.QtCore import Qt, Signal, QTimer
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtWidgets import QApplication, QMainWindow, QRadioButton
 
+import LogBookClient.LBG as lbg
+from LogBookClient.LogBookWebService import LogBookWebService
+from qtpy.QtGui import QFontDatabase, QFont
+import os
 
 @dataclass
 class ExperimentState:
@@ -22,72 +27,220 @@ class ExperimentState:
 experiment_states = {
     0: ExperimentState(
            index=0,
-           desc="Configuration Change",
+           desc="Configuration Change / Tuning",
            widget="config_change_button",
        ),
     1: ExperimentState(
            index=1,
-           desc="Tuning",
-           widget="tuning_button",
-       ),
-    2: ExperimentState(
-           index=2,
            desc="Beam Down (Upstream of Dump)",
            widget="beam_down_button",
        ),
+    2: ExperimentState(
+           index=2,
+           desc="X-ray Beam Alignment",
+           widget="alignment_button",
+       ),
     3: ExperimentState(
            index=3,
-           desc="Alignment and Shaping",
-           widget="alignment_button",
+           desc="X-ray Beam Focusing",
+           widget="focusing_button",
        ),
     4: ExperimentState(
            index=4,
-           desc="Focusing and Correction",
-           widget="focusing_button",
+           desc="Laser / X-ray Spatial Overlap",
+           widget="ip_spacial_button",
        ),
     5: ExperimentState(
            index=5,
-           desc="IP Spatial Overlap",
-           widget="ip_spacial_button",
+           desc="Laser Coarse Timing",
+           widget="coarse_timing_button",
        ),
     6: ExperimentState(
            index=6,
-           desc="Coarse Timing",
-           widget="coarse_timing_button",
+           desc="Laser Fine Timing",
+           widget="fine_timing_button",
        ),
     7: ExperimentState(
            index=7,
-           desc="Fine Timing",
-           widget="fine_timing_button",
-       ),
-    8: ExperimentState(
-           index=8,
            desc="Sample Alignment",
            widget="sample_alignment_button",
        ),
-    9: ExperimentState(
-           index=9,
+    8: ExperimentState(
+           index=8,
            desc="Collecting Data",
            widget="collecting_data_button",
+       ),
+    9: ExperimentState(
+           index=9,
+           desc="Sample Change",
+           widget="sample_change_button",
         ),
     10: ExperimentState(
-            index=10,
-            desc="Instrument Down",
-            widget="instrument_down_button",
+           index=10,
+           desc="Down - PPS",
+           widget="down_pps_button",
         ),
     11: ExperimentState(
-            index=11,
-            desc="Standby / Off Shift",
-            widget="standby_button",
+           index=11,
+           desc="Down - MPS / PMPS",
+           widget="down_mps_button",
+        ),
+    12: ExperimentState(
+           index=12,
+           desc="Down - Mechanical",
+           widget="down_mechanical_button",
+        ),
+    13: ExperimentState(
+           index=13,
+           desc="Down - Laser",
+           widget="down_laser_button",
+        ),
+    14: ExperimentState(
+           index=14,
+           desc="Down - Controls",
+           widget="down_controls_button",
+        ),
+    15: ExperimentState(
+           index=15,
+           desc="Down - DAQ",
+           widget="down_daq_button",
+        ),
+    16: ExperimentState(
+           index=16,
+           desc="Down - AMI",
+           widget="down_ami_button",
+        ),
+    17: ExperimentState(
+           index=17,
+           desc="Down - Network",
+           widget="down_network_button",
+        ),
+    18: ExperimentState(
+           index=18,
+           desc="Down - Sample Delivery",
+           widget="down_sample_delivery_button",
+        ),
+    19: ExperimentState(
+           index=19,
+           desc="Down - Data Analysis Delaying Decisions",
+           widget="down_data_analysis_button",
+        ),
+    20: ExperimentState(
+           index=20,
+           desc="Down - Other",
+           widget="down_other_button",
+        ),
+    21: ExperimentState(
+           index=21,
+           desc="Standby / Off Shift",
+           widget="standby_button",
         ),
 }
 
+#
+# PYDMLineEdit by default clears itself if it loses focus without a
+# return being pressed.  People don't like that, so override the
+# focusOutEvent method with this.
+#
+def myFocusOutEvent(self, event):
+    if self._display is not None:
+        self.send_value()
+    super(PyDMLineEdit, self).focusOutEvent(event)
 
 class ESTApp(Display):
     new_value = Signal(int)
 
+    def lb_resize_handler(self):
+        self.mw.adjustSize()
+
+    #
+    # This looks at the macros to do some argument parsing similar to the
+    # LBG.run_GUIGrabSubmitElog function.
+    #
+    def setup_grubber(self, layout, macros):
+        print(macros)
+        app = QApplication.instance()
+        fontfile = os.path.abspath(os.path.join(lbg.__file__, "..", "..", "static",
+                                                "PlayfairDisplay-Regular.ttf"))
+        id = QFontDatabase.addApplicationFont(fontfile)
+        if id >= 0:
+            app.setFont(QFont(QFontDatabase.applicationFontFamilies(id)[0], 10))
+        with open(os.path.abspath(os.path.join(lbg.__file__, "..", "..", "static", 
+                                               "lgbk.css")), 'r') as f:
+            app.setStyleSheet(f.read())
+        inssta = macros['endstation']
+        try:
+            inssta = macros['lbinst']
+        except:
+            pass
+        sta = ''
+        pos = inssta.rfind(':')
+        if pos==-1:
+            ins = inssta
+        else:
+            ins = inssta[:pos]
+            if len(inssta[pos:]) > 1:
+                sta = inssta[pos+1:]
+
+        url = "https://pswww.slac.stanford.edu/ws-auth/lgbk"
+        try:
+            if macros['lbdebug']:
+                url = "https://pswww.slac.stanford.edu/ws-auth/devlgbk"
+        except:
+            pass
+
+        usr = ins.lower() + "opr"
+        try:
+            usr = macros['lbuser']
+        except:
+            pass
+
+        pas = "pcds"
+        try:
+            pas = macros['lbpass']
+        except:
+            pass
+
+        exp = "current"
+        try:
+            exp = macros['lbexp']
+        except:
+            pass
+
+        pars = {
+            'ins'    : ins,
+            'sta'    : sta,
+            'exp'    : "current",
+            'url'    : url,
+            'usr'    : usr,
+            'pas'    : pas
+        }
+        print(pars)
+        lbws = LogBookWebService(**pars)
+        pars2 = {
+            'ins'    : "OPS",
+            'sta'    : sta,
+            'exp'    : ins + " Instrument",
+            'url'    : url,
+            'usr'    : usr,
+            'pas'    : pas,
+        }
+        print(pars2)
+        lbws2 = LogBookWebService(**pars2)
+        w = lbg.GUIGrabSubmitELog(cfname=None, lbws=lbws, lbws2=lbws2, opts=None)
+        w.lb_resize.connect(self.lb_resize_handler)
+        layout.addWidget(w)
+        self.lbg = w
+        for widget in app.topLevelWidgets():
+            if isinstance(widget, QMainWindow):
+                self.mw = widget
+                break
+
     def __init__(self, parent=None, args=None, macros=None):
         super().__init__(parent=parent, args=args, macros=macros)
+        # This is probably assuming too much about est.ui, but whatever.
+        if 'nolb' not in macros.keys():
+            self.setup_grubber(self.ui.verticalLayout_3, macros)
         self.initialize_state_options(macros['endstation'])
         self.channel = PyDMChannel(
             address=f"ca://IOC:{macros['endstation']}:EXPSTATE:State.INDX",
@@ -112,6 +265,10 @@ class ESTApp(Display):
         #        )
         #        print('here')
         #        break
+        self.ui.user_note_edit.focusOutEvent = partial(
+            myFocusOutEvent, self.ui.user_note_edit
+        )
+        
 
     def initialize_state_options(self, endstation):
         state_options = EpicsSignal(
