@@ -357,9 +357,6 @@
          <property name="toolTip">
           <string/>
          </property>
-         <property name="channel" stdset="0">
-          <string>ca://IOC:${endstation}:EXPSTATE:UserStatus</string>
-         </property>
          <property name="displayFormat" stdset="0">
           <enum>PyDMLineEdit::String</enum>
          </property>

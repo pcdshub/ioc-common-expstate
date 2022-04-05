@@ -150,6 +150,9 @@ def myFocusOutEvent(self, event):
 class ESTApp(Display):
     new_value = Signal(int)
 
+    #
+    # When the grubber resizes, tell the mainwindow to adjust to it!
+    #
     def lb_resize_handler(self):
         self.mw.adjustSize()
 
@@ -158,7 +161,6 @@ class ESTApp(Display):
     # LBG.run_GUIGrabSubmitElog function.
     #
     def setup_grubber(self, layout, macros):
-        print(macros)
         app = QApplication.instance()
         fontfile = os.path.abspath(os.path.join(lbg.__file__, "..", "..", "static",
                                                 "PlayfairDisplay-Regular.ttf"))
@@ -173,7 +175,7 @@ class ESTApp(Display):
             inssta = macros['lbinst']
         except:
             pass
-        sta = ''
+        sta = '0'
         pos = inssta.rfind(':')
         if pos==-1:
             ins = inssta
@@ -215,7 +217,6 @@ class ESTApp(Display):
             'usr'    : usr,
             'pas'    : pas
         }
-        print(pars)
         lbws = LogBookWebService(**pars)
         pars2 = {
             'ins'    : "OPS",
@@ -225,7 +226,6 @@ class ESTApp(Display):
             'usr'    : usr,
             'pas'    : pas,
         }
-        print(pars2)
         lbws2 = LogBookWebService(**pars2)
         w = lbg.GUIGrabSubmitELog(cfname=None, lbws=lbws, lbws2=lbws2, opts=None)
         w.lb_resize.connect(self.lb_resize_handler)
@@ -241,6 +241,9 @@ class ESTApp(Display):
         # This is probably assuming too much about est.ui, but whatever.
         if 'nolb' not in macros.keys():
             self.setup_grubber(self.ui.verticalLayout_3, macros)
+        inssta = macros['endstation']
+        if inssta.find(":") == -1:
+            macros['endstation'] = inssta + ":0"
         self.initialize_state_options(macros['endstation'])
         self.channel = PyDMChannel(
             address=f"ca://IOC:{macros['endstation']}:EXPSTATE:State.INDX",
@@ -250,6 +253,13 @@ class ESTApp(Display):
         self.channel.connect()
         self.setup_radio_buttons()
         self.setup_timer()
+        #
+        # Sigh.  We've patched the endstation macro to make sure
+        # that it has a station... but too late for the user_note_edit.
+        # Let's not define a channel for it in the ui file, but set
+        # it here instead.
+        #
+        self.user_note_edit.channel = f"ca://IOC:{macros['endstation']}:EXPSTATE:UserStatus"
 
         # Does nothing on moba, need to test in hutch
         self.setWindowFlags(

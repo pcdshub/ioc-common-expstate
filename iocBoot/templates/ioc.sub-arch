@@ -1,7 +1,7 @@
-$$LOOP(HUTCH)
 file exp_state.tpl-arch
 {
     pattern { P                       }
-            { IOC:$$HUTCH:EXPSTATE:   }
+$$LOOP(COUNT)
+            { IOC:$$HUTCH:$$INDEX:EXPSTATE:   }
+$$ENDLOOP(COUNT)
 }
-$$ENDLOOP(HUTCH)

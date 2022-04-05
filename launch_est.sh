@@ -10,7 +10,6 @@ export PATH=/cds/home/m/mcbrowne/LogBookClient/LogBookClient:${PATH}
 LAUNCHER="$(readlink -f ${BASH_SOURCE[0]})"
 UI="$(dirname ${LAUNCHER})/screen"
 
-inssta=${1}
-shift
+inssta=`get_info --getHutch`:`get_info --getstation`
 
 pydm --hide-nav-bar --hide-menu-bar --hide-status-bar -m "endstation=${inssta},$*" "${UI}/est.py"
