@@ -34,7 +34,7 @@ set_pass0_restoreFile( "$$IOCNAME.sav" )        #just restore the settings
 set_pass1_restoreFile( "$$IOCNAME.sav" )        #just restore the settings
 
 # Configure access security: this is required for caPutLog.
-#MCB asSetFilename("$(TOP)/iocBoot/templates/unrestricted.acf")
+asSetFilename("$(TOP)/iocBoot/templates/unrestricted.acf")
 
 # Initialize the IOC and start processing records
 iocInit()
@@ -45,7 +45,7 @@ iocInit()
 #       caPutLogOnChange    0: log only on value change
 #       caPutLogAll         1: log all puts
 #       caPutLogAllNoFilter 2: log all puts no filtering on same PV
-#MCB caPutLogInit("${EPICS_CAPUTLOG_HOST}:${EPICS_CAPUTLOG_PORT}", 0)
+caPutLogInit("${EPICS_CAPUTLOG_HOST}:${EPICS_CAPUTLOG_PORT}", 0)
 
 # Start autosave backups
 create_monitor_set( "$$IOCNAME.req", 30, "" )
