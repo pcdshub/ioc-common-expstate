@@ -183,6 +183,8 @@ class ESTApp(Display):
             ins = inssta[:pos]
             if len(inssta[pos:]) > 1:
                 sta = inssta[pos+1:]
+        if ins in ["ASC", "RIX", "TMO", "TXI", "UED"]:
+            ins = ins.lower()
 
         url = "https://pswww.slac.stanford.edu/ws-auth/lgbk"
         try:
