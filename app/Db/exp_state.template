@@ -42,6 +42,18 @@ record(subArray, "$(P):State") {
     # Buffer must be the same size as the input to read in all values
     field(MALM, "$(MAX_STRINGS=200)")
     info(autosaveFields, "INDX DESC")
+    field(FLNK, "$(P):IncUpdate")
+}
+
+record(longout, $(P):Update) {
+    field(VAL, "0")
+    field(PINI, "YES")
+}
+
+record(calcout, $(P):IncUpdate) {
+    field(INPA, "$(P):Update NPP NMS")
+    field(CALC, "(A+1)%1000")
+    field(OUT,  "$(P):Update PP")
 }
 
 # Some clients (the archiver appliance included) may have issues with the
