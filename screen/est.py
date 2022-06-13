@@ -246,6 +246,11 @@ class ESTApp(Display):
             self.windowFlags() | Qt.WindowStaysOnTopHint
         )
 
+        app = QApplication.instance()
+        for widget in app.topLevelWidgets():
+            if isinstance(widget, QMainWindow):
+                self.setWindowTitle("%s Experiment State Tracker" % macros['endstation'])
+        
         ## Makes the app never render over moba, need to test in hutch
         #app = QApplication.instance()
         #for widget in app.topLevelWidgets():
