@@ -191,6 +191,10 @@ class ESTApp(Display):
             'usr'    : usr,
             'pas'    : pas
         }
+        try:
+            pars['cmd'] = macros['cmd']
+        except:
+            pass
         lbws = LogBookWebService(**pars)
         pars2 = {
             'ins'    : "OPS",
@@ -200,6 +204,10 @@ class ESTApp(Display):
             'usr'    : usr,
             'pas'    : pas,
         }
+        try:
+            pars2['cmd'] = macros['cmd']
+        except:
+            pass
         lbws2 = LogBookWebService(**pars2)
         w = lbg.GUIGrabSubmitELog(cfname=None, lbws=lbws, lbws2=lbws2, opts=None)
         self.msgbox = w.findChild(QTextEdit)
