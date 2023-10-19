@@ -196,20 +196,7 @@ class ESTApp(Display):
         except:
             pass
         lbws = LogBookWebService(**pars)
-        pars2 = {
-            'ins'    : "OPS",
-            'sta'    : sta,
-            'exp'    : ins + " Instrument",
-            'url'    : url,
-            'usr'    : usr,
-            'pas'    : pas,
-        }
-        try:
-            pars2['cmd'] = macros['cmd']
-        except:
-            pass
-        lbws2 = LogBookWebService(**pars2)
-        w = lbg.GUIGrabSubmitELog(cfname=None, lbws=lbws, lbws2=lbws2, opts=None)
+        w = lbg.GUIGrabSubmitELog(cfname=None, lbws=lbws, opts=None)
         self.msgbox = w.findChild(QTextEdit)
         print(self.msgbox)
         w.lb_resize.connect(self.lb_resize_handler)
