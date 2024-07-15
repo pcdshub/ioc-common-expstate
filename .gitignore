@@ -1,12 +1,29 @@
-*.sw[op]
+# Built file ignores
 O.*
-/bin/
-/db/
-/dbd/
-/archive/
-/autosave/
-/include/
+archive
+autosave
+bin
+build
+db
+dbd
 envPaths
+html
+include
+lib
+*.log
+
+# Terminal editor ignores
+*.swp
+*~
+
+# IDE ignores
+*.vscode
+
+# Core dumps
+core.*
+
+# From original afs gitignore
+*.sw[op]
 .DS_Store
 tags
 __pycache__
