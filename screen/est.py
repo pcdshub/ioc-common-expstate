@@ -10,7 +10,7 @@ from pydm.widgets import PyDMLineEdit
 
 from qtpy.QtCore import Qt, Signal, QTimer
 from qtpy.QtGui import QBrush, QColor
-from qtpy.QtWidgets import QApplication, QMainWindow, QRadioButton
+from qtpy.QtWidgets import QApplication, QMainWindow, QRadioButton, QTextEdit
 
 import LogBookClient.LBG as lbg
 from LogBookClient.LogBookWebService import LogBookWebService
@@ -21,134 +21,106 @@ import os
 class ExperimentState:
     index: int
     desc: str
-    widget: str
 
+# What numbers do dividers go before?
+dividers = [2, 4, 8, 10, 21]
+cb2esmap = {}
+es2cbmap = {}
 
 experiment_states = {
     0: ExperimentState(
            index=0,
            desc="Configuration Change / Tuning",
-           widget="config_change_button",
        ),
     1: ExperimentState(
            index=1,
            desc="Beam Down (Upstream of Dump)",
-           widget="beam_down_button",
        ),
     2: ExperimentState(
            index=2,
            desc="X-ray Beam Alignment",
-           widget="alignment_button",
        ),
     3: ExperimentState(
            index=3,
            desc="X-ray Beam Focusing",
-           widget="focusing_button",
        ),
     4: ExperimentState(
            index=4,
            desc="Laser / X-ray Spatial Overlap",
-           widget="ip_spacial_button",
        ),
     5: ExperimentState(
            index=5,
            desc="Laser Coarse Timing",
-           widget="coarse_timing_button",
        ),
     6: ExperimentState(
            index=6,
            desc="Laser Fine Timing",
-           widget="fine_timing_button",
        ),
     7: ExperimentState(
            index=7,
            desc="Sample Alignment",
-           widget="sample_alignment_button",
        ),
     8: ExperimentState(
            index=8,
            desc="Collecting Data",
-           widget="collecting_data_button",
        ),
     9: ExperimentState(
            index=9,
            desc="Sample Change",
-           widget="sample_change_button",
         ),
     10: ExperimentState(
            index=10,
            desc="Down - PPS",
-           widget="down_pps_button",
         ),
     11: ExperimentState(
            index=11,
            desc="Down - MPS / PMPS",
-           widget="down_mps_button",
         ),
     12: ExperimentState(
            index=12,
            desc="Down - Mechanical",
-           widget="down_mechanical_button",
         ),
     13: ExperimentState(
            index=13,
            desc="Down - Laser",
-           widget="down_laser_button",
         ),
     14: ExperimentState(
            index=14,
            desc="Down - Controls",
-           widget="down_controls_button",
         ),
     15: ExperimentState(
            index=15,
            desc="Down - DAQ",
-           widget="down_daq_button",
         ),
     16: ExperimentState(
            index=16,
            desc="Down - AMI",
-           widget="down_ami_button",
         ),
     17: ExperimentState(
            index=17,
            desc="Down - Network",
-           widget="down_network_button",
         ),
     18: ExperimentState(
            index=18,
            desc="Down - Sample Delivery",
-           widget="down_sample_delivery_button",
         ),
     19: ExperimentState(
            index=19,
            desc="Down - Data Analysis Delaying Decisions",
-           widget="down_data_analysis_button",
         ),
     20: ExperimentState(
            index=20,
            desc="Down - Other",
-           widget="down_other_button",
         ),
     21: ExperimentState(
            index=21,
            desc="Standby / Off Shift",
-           widget="standby_button",
         ),
 }
 
-#
-# PYDMLineEdit by default clears itself if it loses focus without a
-# return being pressed.  People don't like that, so override the
-# focusOutEvent method with this.
-#
-def myFocusOutEvent(self, event):
-    if self._display is not None:
-        self.send_value()
-    super(PyDMLineEdit, self).focusOutEvent(event)
-
 class ESTApp(Display):
     new_value = Signal(int)
+    new_msg = Signal(str)
 
     #
     # When the grubber resizes, tell the mainwindow to adjust to it!
@@ -219,17 +191,14 @@ class ESTApp(Display):
             'usr'    : usr,
             'pas'    : pas
         }
+        try:
+            pars['cmd'] = macros['cmd']
+        except:
+            pass
         lbws = LogBookWebService(**pars)
-        pars2 = {
-            'ins'    : "OPS",
-            'sta'    : sta,
-            'exp'    : ins + " Instrument",
-            'url'    : url,
-            'usr'    : usr,
-            'pas'    : pas,
-        }
-        lbws2 = LogBookWebService(**pars2)
-        w = lbg.GUIGrabSubmitELog(cfname=None, lbws=lbws, lbws2=lbws2, opts=None)
+        w = lbg.GUIGrabSubmitELog(cfname=None, lbws=lbws, opts=None)
+        self.msgbox = w.findChild(QTextEdit)
+        print(self.msgbox)
         w.lb_resize.connect(self.lb_resize_handler)
         layout.addWidget(w)
         self.lbg = w
@@ -242,7 +211,7 @@ class ESTApp(Display):
         super().__init__(parent=parent, args=args, macros=macros)
         # This is probably assuming too much about est.ui, but whatever.
         if 'nolb' not in macros.keys():
-            self.setup_grubber(self.ui.verticalLayout_3, macros)
+            self.setup_grubber(self.ui.verticalLayout_1, macros)
         inssta = macros['endstation']
         if inssta.find(":") == -1:
             macros['endstation'] = inssta + ":0"
@@ -253,21 +222,30 @@ class ESTApp(Display):
             value_signal=self.new_value,
         )
         self.channel.connect()
-        self.setup_radio_buttons()
+        self.ch2 = PyDMChannel(
+            address=f"ca://IOC:{macros['endstation']}:EXPSTATE:Update",
+            value_slot=self.handle_update_ctr,
+        )
+        self.ch2.connect()
+        self.ch3 = PyDMChannel(
+            address=f"ca://IOC:{macros['endstation']}:EXPSTATE:UserStatus",
+            value_signal=self.new_msg,
+        )
+        self.ch3.connect()
+        self.setup_button()
+        self.setup_combobox()
         self.setup_timer()
-        #
-        # Sigh.  We've patched the endstation macro to make sure
-        # that it has a station... but too late for the user_note_edit.
-        # Let's not define a channel for it in the ui file, but set
-        # it here instead.
-        #
-        self.user_note_edit.channel = f"ca://IOC:{macros['endstation']}:EXPSTATE:UserStatus"
 
         # Does nothing on moba, need to test in hutch
         self.setWindowFlags(
             self.windowFlags() | Qt.WindowStaysOnTopHint
         )
 
+        app = QApplication.instance()
+        for widget in app.topLevelWidgets():
+            if isinstance(widget, QMainWindow):
+                self.setWindowTitle("%s Experiment State Tracker" % macros['endstation'])
+        
         ## Makes the app never render over moba, need to test in hutch
         #app = QApplication.instance()
         #for widget in app.topLevelWidgets():
@@ -277,10 +255,6 @@ class ESTApp(Display):
         #        )
         #        print('here')
         #        break
-        self.ui.user_note_edit.focusOutEvent = partial(
-            myFocusOutEvent, self.ui.user_note_edit
-        )
-        
 
     def initialize_state_options(self, endstation):
         state_options = EpicsSignal(
@@ -302,25 +276,35 @@ class ESTApp(Display):
             )
         )
 
-    def setup_radio_buttons(self):
-        for state in experiment_states.values():
-            button = self.findChild(QRadioButton, state.widget)
-            button.clicked.connect(
-                partial(self.handle_button_click, state)
-            )
-
-    def handle_button_click(self, state, checked):
-        if checked:
-            self.new_value.emit(state.index)
-            self.reset_timer()
-
     def handle_state_update(self, index):
-        try:
-            button_name = experiment_states[index].widget
-        except IndexError:
-            return
-        button = self.findChild(QRadioButton, button_name)
-        button.setChecked(True)
+        self.ui.comboBox.setCurrentIndex(es2cbmap[index])
+
+    def handle_update_ctr(self, value):
+        self.reset_timer()  
+
+    def handle_combobox(self, i):
+        print(cb2esmap[i])
+        self.new_value.emit(cb2esmap[i])
+        self.reset_timer()
+
+    def setup_combobox(self):
+        # We need to do these in order!!
+        j = 0
+        for i in range(len(experiment_states)):
+            if i in dividers:
+                self.ui.comboBox.insertSeparator(1000)
+                j = j + 1
+            self.ui.comboBox.addItem(experiment_states[i].desc)
+            cb2esmap[j] = i
+            es2cbmap[i] = j
+            j = j + 1
+        self.ui.comboBox.currentIndexChanged.connect(self.handle_combobox)
+
+    def handle_msgbutton(self):
+        self.new_msg.emit(self.msgbox.toPlainText())
+
+    def setup_button(self):
+        self.ui.msgButton.clicked.connect(self.handle_msgbutton)
 
     def setup_timer(self):
         self.is_red = True

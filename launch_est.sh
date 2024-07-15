@@ -10,4 +10,10 @@ UI="$(dirname ${LAUNCHER})/screen"
 
 inssta=`get_info --getHutch`:`get_info --getstation`
 
+caget IOC:${inssta}:EXPSTATE:State.INDX >/dev/null 2>&1
+if [ $? != 0 ]; then 
+    zenity --info --text="Cannot access IOC:"${inssta}":EXPSTATE:State.INDX.  Is the ioc-"`get_info --gethutch`"-expstate IOC down?" >/dev/null 2>&1
+    exit 0
+fi
+
 pydm --hide-nav-bar --hide-menu-bar --hide-status-bar -m "endstation=${inssta},$*" "${UI}/est.py"
