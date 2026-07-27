@@ -9,7 +9,7 @@ endif
 
 include $(TOP)/configure/CONFIG
 ifndef ARCH
-ARCH = rhel7-x86_64
+ARCH = rhel9-x86_64
 endif
 
 INSTALL_LOCATION = ../..

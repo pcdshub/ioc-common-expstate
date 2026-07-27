@@ -1,4 +1,4 @@
-#!$$IOCTOP/bin/rhel7-x86_64/expState
+#!$$IOCTOP/bin/rhel9-x86_64/expState
 
 epicsEnvSet( "EPICS_NAME", "$$TRANSLATE(IOCNAME,"a-z_-","A-Z::")" )
 epicsEnvSet( "ENGINEER",  "$$ENGINEER" )
